@@ -8,15 +8,13 @@ variable "key_path" {
 
 variable "aws_region" {
   description = "AWS region to launch servers."
-  default = "us-west-2"
+  default = "ap-northeast-1"
 }
 
-# Ubuntu Precise 12.04 LTS (x64)
+# Ubuntu Precise 14.04 LTS (x64)
 variable "aws_amis" {
   default = {
-    eu-west-1 = "ami-b1cf19c6"
-    us-east-1 = "ami-de7ab6b6"
-    us-west-1 = "ami-3f75767a"
-    us-west-2 = "ami-21f78e11"
+    ap-northeast-1 = "ami-936d9d93"
+    ap-southeast-2 =  "ami-69631053"
   }
 }

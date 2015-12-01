@@ -72,7 +72,7 @@ resource "aws_instance" "app-server" {
     key_file = "${var.key_path}"
   }
 
-  instance_type = "m1.small"
+  instance_type = "t2.small"
 
   # Lookup the correct AMI based on the region
   # we specified
@@ -86,7 +86,7 @@ resource "aws_instance" "app-server" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow HTTP and SSH access
-  security_groups = ["${aws_security_group.default.name}"]
+  security_groups = ["${aws_security_group.company_news_app.name}"]
 
   # We run a remote provisioner on the instance after creating it.
   # In this case, we just install nginx and start it. By default,
