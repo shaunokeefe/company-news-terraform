@@ -98,4 +98,21 @@ resource "aws_instance" "app-server" {
       "sudo service nginx start"
     ]
   }
+  provisioner "chef"  {
+    attributes {
+      "key" = "value"
+      "app" {
+          "cluster1" {
+              "nodes" = ["webserver1", "webserver2"]
+          }
+      }
+    }
+    environment = "_default"
+    run_list = ["cookbook::recipe"]
+    node_name = "webserver1"
+    secret_key = "${file("../encrypted_data_bag_secret")}"
+    server_url = "https://chef.company.com/organizations/org1"
+    validation_client_name = "chef-validator"
+    validation_key = "${file("../chef-validator.pem")}"
+    version = "12.4.1"
 }
