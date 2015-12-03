@@ -6,7 +6,7 @@ provider "aws" {
 # Our default security group to access
 # the instances over SSH and HTTP
 resource "aws_security_group" "company_news_app" {
-  name = "compant_news_app"
+  name = "company_news_app"
   description = "Group for a CompanyNews app server"
 
   # SSH access from anywhere
