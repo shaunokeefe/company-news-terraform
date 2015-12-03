@@ -43,24 +43,6 @@ resource "aws_security_group" "company_news_app" {
 }
 
 
-#resource "aws_elb" "web" {
-#  name = "terraform-example-elb"
-#
-#  # The same availability zone as our instance
-#  availability_zones = ["${aws_instance.web.availability_zone}"]
-#
-#  listener {
-#    instance_port = 80
-#    instance_protocol = "http"
-#    lb_port = 80
-#    lb_protocol = "http"
-#  }
-#
-#  # The instance is registered automatically
-#  instances = ["${aws_instance.web.id}"]
-#}
-
-
 resource "aws_instance" "app-server" {
   # The connection block tells our provisioner how to
   # communicate with the resource (instance)
@@ -87,15 +69,4 @@ resource "aws_instance" "app-server" {
 
   # Our Security group to allow HTTP and SSH access
   security_groups = ["${aws_security_group.company_news_app.name}"]
-
-  # We run a remote provisioner on the instance after creating it.
-  # In this case, we just install nginx and start it. By default,
-  # this should be on port 80
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get -y update",
-      "sudo apt-get -y install nginx",
-      "sudo service nginx start"
-    ]
-  }
 }
