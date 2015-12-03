@@ -98,29 +98,40 @@ resource "aws_security_group" "company_news_lb" {
 #}
 
 
-resource "aws_instance" "app-server" {
-  # The connection block tells our provisioner how to
-  # communicate with the resource (instance)
+resource "aws_instance" "app-server-1" {
   connection {
-    # The default username for our AMI
     user = "ubuntu"
-
-    # The path to your keyfile
     key_file = "${var.key_path}"
   }
-
   instance_type = "t2.small"
-
-  # Lookup the correct AMI based on the region
-  # we specified
-  ami = "${lookup(var.aws_amis, var.aws_region)}"
-
-  # The name of our SSH keypair you've created and downloaded
-  # from the AWS console.
-  #
-  # https://console.aws.amazon.com/ec2/v2/home?region=us-west-2#KeyPairs:
-  #
+  ami = "ami-47587629"
   key_name = "${var.key_name}"
+  security_groups = ["${aws_security_group.company_news_app.name}"]
+  private_ip = "172.31.24.20"
+}
+
+resource "aws_instance" "app-server-2" {
+  connection {
+    user = "ubuntu"
+    key_file = "${var.key_path}"
+  }
+  instance_type = "t2.small"
+  ami = "ami-47587629"
+  key_name = "${var.key_name}"
+  security_groups = ["${aws_security_group.company_news_app.name}"]
+  private_ip = "172.31.24.21"
+}
+
+resource "aws_instance" "load-balancer-1" {
+  connection {
+    user = "ubuntu"
+    key_file = "${var.key_path}"
+  }
+  instance_type = "t2.small"
+  ami = "ami-562b0538"
+  key_name = "${var.key_name}"
+  security_groups = ["${aws_security_group.company_news_lb.name}"]
+  user_data = "${file("lb_userdata.sh")}"
 
   # Our Security group to allow HTTP and SSH access
   security_groups = ["${aws_security_group.company_news_app.name}"]
@@ -134,5 +145,15 @@ resource "aws_instance" "app-server" {
       "sudo apt-get -y install nginx",
       "sudo service nginx start"
     ]
+resource "aws_instance" "load-balancer-2" {
+  connection {
+    user = "ubuntu"
+    key_file = "${var.key_path}"
   }
+  instance_type = "t2.small"
+  ami = "ami-562b0538"
+  key_name = "${var.key_name}"
+  security_groups = ["${aws_security_group.company_news_lb.name}"]
+  user_data = "${file("lb_userdata.sh")}"
+}
 }
