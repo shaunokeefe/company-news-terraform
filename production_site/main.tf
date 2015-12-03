@@ -114,6 +114,10 @@ resource "aws_instance" "load-balancer-1" {
   security_groups = ["${aws_security_group.company_news_lb.name}"]
   user_data = "${file("lb_userdata.sh")}"
 
+resource "aws_eip" "lb-1-eip" {
+  instance = "${aws_instance.load-balancer-1.id}"
+  vpc = true
+}
 
 resource "aws_instance" "load-balancer-2" {
   connection {
@@ -126,4 +130,28 @@ resource "aws_instance" "load-balancer-2" {
   security_groups = ["${aws_security_group.company_news_lb.name}"]
   user_data = "${file("lb_userdata.sh")}"
 }
+
+resource "aws_eip" "lb-2-eip" {
+  instance = "${aws_instance.load-balancer-2.id}"
+  vpc = true
+}
+
+resource "aws_route53_zone" "primary" {
+   name = "companynews.com"
+}
+
+resource "aws_route53_record" "tld" {
+   zone_id = "${aws_route53_zone.primary.zone_id}"
+   name = "companynews.com"
+   type = "A"
+   ttl = "300"
+   records = ["${aws_eip.lb-1-eip.public_ip}"]
+}
+
+resource "aws_route53_record" "www" {
+   zone_id = "${aws_route53_zone.primary.zone_id}"
+   name = "www.companynews.com"
+   type = "A"
+   ttl = "300"
+   records = ["${aws_eip.lb-1-eip.public_ip}"]
 }
