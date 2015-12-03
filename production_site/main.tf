@@ -114,8 +114,6 @@ resource "aws_instance" "load-balancer-1" {
   security_groups = ["${aws_security_group.company_news_lb.name}"]
   user_data = "${file("lb_userdata.sh")}"
 
-  # Our Security group to allow HTTP and SSH access
-  security_groups = ["${aws_security_group.company_news_app.name}"]
 
 resource "aws_instance" "load-balancer-2" {
   connection {
