@@ -44,29 +44,30 @@ resource "aws_security_group" "company_news_app" {
 
 
 resource "aws_instance" "app-server" {
-  # The connection block tells our provisioner how to
-  # communicate with the resource (instance)
   connection {
-    # The default username for our AMI
     user = "ubuntu"
-
-    # The path to your keyfile
     key_file = "${var.key_path}"
   }
 
-  instance_type = "t2.small"
-
-  # Lookup the correct AMI based on the region
-  # we specified
-  ami = "${lookup(var.aws_amis, var.aws_region)}"
-
-  # The name of our SSH keypair you've created and downloaded
-  # from the AWS console.
-  #
-  # https://console.aws.amazon.com/ec2/v2/home?region=us-west-2#KeyPairs:
-  #
+  instance_type = "t2.medium"
+  ami = "${lookup(var.default_amis, var.aws_region)}"
   key_name = "${var.key_name}"
-
-  # Our Security group to allow HTTP and SSH access
   security_groups = ["${aws_security_group.company_news_app.name}"]
+}
+
+resource "aws_eip" "app-eip" {
+  instance = "${aws_instance.app-server.id}"
+  vpc = true
+}
+
+resource "aws_route53_zone" "primary" {
+   name = "companynews.com"
+}
+
+resource "aws_route53_record" "demo-app-record" {
+   zone_id = "${aws_route53_zone.primary.zone_id}"
+   name = "test.companynews.com"
+   type = "A"
+   ttl = "300"
+   records = ["${aws_eip.app-eip.public_ip}"]
 }

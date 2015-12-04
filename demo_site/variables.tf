@@ -12,9 +12,9 @@ variable "aws_region" {
 }
 
 # Ubuntu Precise 14.04 LTS (x64)
-variable "aws_amis" {
+variable "default_amis" {
   default = {
-    ap-northeast-1 = "ami-936d9d93"
-    ap-southeast-2 =  "ami-69631053"
+    ap-northeast-1 = "ami-1f80af71"
+    ap-southeast-2 = "ami-69631053"
   }
 }
