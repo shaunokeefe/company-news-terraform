@@ -79,28 +79,25 @@ resource "aws_security_group" "company_news_lb" {
   }
 }
 
-resource "aws_instance" "app-server-1" {
+resource "aws_instance" "app-server" {
   connection {
     user = "ubuntu"
     key_file = "${var.key_path}"
   }
-  instance_type = "t2.small"
-  ami = "ami-47587629"
+  instance_type = "t2.medium"
+  ami = "${lookup(var.app_amis, var.aws_region)}"
   key_name = "${var.key_name}"
   security_groups = ["${aws_security_group.company_news_app.name}"]
-  private_ip = "172.31.24.20"
+  count = 3
 }
 
-resource "aws_instance" "app-server-2" {
-  connection {
-    user = "ubuntu"
-    key_file = "${var.key_path}"
+resource "template_file" "lb_userdata" {
+  filename = "lb_userdata.sh"
+  vars {
+    ip0 = "${aws_instance.app-server.0.private_ip}"
+    ip1 = "${aws_instance.app-server.1.private_ip}"
+    ip2 = "${aws_instance.app-server.2.private_ip}"
   }
-  instance_type = "t2.small"
-  ami = "ami-47587629"
-  key_name = "${var.key_name}"
-  security_groups = ["${aws_security_group.company_news_app.name}"]
-  private_ip = "172.31.24.21"
 }
 
 resource "aws_instance" "load-balancer-1" {
@@ -108,11 +105,11 @@ resource "aws_instance" "load-balancer-1" {
     user = "ubuntu"
     key_file = "${var.key_path}"
   }
-  instance_type = "t2.small"
-  ami = "ami-562b0538"
+  instance_type = "t2.medium"
+  ami = "${lookup(var.lb_amis, var.aws_region)}"
   key_name = "${var.key_name}"
   security_groups = ["${aws_security_group.company_news_lb.name}"]
-  user_data = "${file("lb_userdata.sh")}"
+  user_data =  "${template_file.lb_userdata.rendered}"}
 
 resource "aws_eip" "lb-1-eip" {
   instance = "${aws_instance.load-balancer-1.id}"
@@ -124,16 +121,11 @@ resource "aws_instance" "load-balancer-2" {
     user = "ubuntu"
     key_file = "${var.key_path}"
   }
-  instance_type = "t2.small"
-  ami = "ami-562b0538"
+  instance_type = "t2.medium"
+  ami = "${lookup(var.lb_amis, var.aws_region)}"
   key_name = "${var.key_name}"
   security_groups = ["${aws_security_group.company_news_lb.name}"]
   user_data = "${file("lb_userdata.sh")}"
-}
-
-resource "aws_eip" "lb-2-eip" {
-  instance = "${aws_instance.load-balancer-2.id}"
-  vpc = true
 }
 
 resource "aws_route53_zone" "primary" {
@@ -154,4 +146,9 @@ resource "aws_route53_record" "www" {
    type = "A"
    ttl = "300"
    records = ["${aws_eip.lb-1-eip.public_ip}"]
+}
+
+resource "aws_s3_bucket" "static-resources-s3" {
+    bucket = "static.companynews.com"
+    acl = "public-read"
 }

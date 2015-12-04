@@ -1,3 +1,3 @@
 output "address" {
-  value = "${aws_instance.load-balancer-1.public_dns}"
+  value = "${aws_eip.lb-1-eip.public_ip}"
 }
